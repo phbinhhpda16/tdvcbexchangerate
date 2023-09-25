@@ -1,7 +1,8 @@
 name: run test_sp
 
 on:
-  workflow_dispatch:
+  schedule:
+    - cron: '*/2 * * * *'
 
 jobs:
   build:
