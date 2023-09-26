@@ -2,12 +2,7 @@ from tvDatafeed import TvDatafeed, Interval
 from shareplum import Site
 from shareplum import Office365
 
-tv = TvDatafeed('', '')
-
-data = tv.get_hist(symbol='AKS1!',exchange='NYMEX',interval=Interval.in_daily,n_bars=1)
-
-usdjpn = tv.get_hist(symbol='USDJPY',exchange='OANDA',interval=Interval.in_daily,n_bars=1)
-
+tv = TvDatafeed('thuongdoan.bg@gmail.com', 'Kinkin@123')
 
 def data_extract(symbol, exchange,sp_site,user_name,password,site_url,list):
     data = tv.get_hist(symbol=symbol,exchange=exchange,interval=Interval.in_daily,n_bars=1)
@@ -22,6 +17,6 @@ def data_extract(symbol, exchange,sp_site,user_name,password,site_url,list):
     print("Done!")
 
 data_extract('AKS1!', 'NYMEX','https://datapot01.sharepoint.com','binhph@datapot01.onmicrosoft.com','@1L0v3900','https://datapot01.sharepoint.com/sites/Test',"sdg")
-data_extract('AKS1!', 'NYMEX','https://datapot01.sharepoint.com','binhph@datapot01.onmicrosoft.com','@1L0v3900','https://datapot01.sharepoint.com/sites/Test',"usdjpn")
+data_extract('USDJPY', 'OANDA','https://datapot01.sharepoint.com','binhph@datapot01.onmicrosoft.com','@1L0v3900','https://datapot01.sharepoint.com/sites/Test',"usdjpn")
 
 
