@@ -14,7 +14,6 @@ def data_extract(symbol, exchange,sp_site,user_name,password,site_url,list):
     site = Site(site_url, authcookie=authcookie)
     sp_list = site.List(list)
     sp_list.UpdateListItems(data=data_dict, kind='New')
-    print("Done!")
 
 data_extract('AKS1!', 'NYMEX','https://datapot01.sharepoint.com','binhph@datapot01.onmicrosoft.com','@1L0v3900','https://datapot01.sharepoint.com/sites/Test',"sdg")
 data_extract('USDJPY', 'OANDA','https://datapot01.sharepoint.com','binhph@datapot01.onmicrosoft.com','@1L0v3900','https://datapot01.sharepoint.com/sites/Test',"usdjpn")
