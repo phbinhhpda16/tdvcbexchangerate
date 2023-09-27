@@ -1,8 +1,7 @@
-name: run test_sp
+name: run main.py
 
 on:
-  schedule:
-    - cron: '*/2 * * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -18,7 +17,11 @@ jobs:
 
       - name: install python packages
         run: |
-          python -m pip install shareplum
+          python -m pip install --upgrade --no-cache-dir git+https://github.com/rongardF/tvdatafeed.git
+          pip install shareplum
+          pip install pandas
           pip install datetime
+          pip install requests
+          pip install bs4
       - name: execute py script # run main.py
-        run: python test_sp.py
+        run: python main.py
