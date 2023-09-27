@@ -71,6 +71,4 @@ aks_yesterday.at[0, "Update Day"] = yesterday
 sp_data_df = sp_data_df.merge(aks_yesterday, on = "Update Day", how = "outer")
 yesterday_update = sp_data_df.to_dict("records")
 sp_list.UpdateListItems(data = yesterday_update, kind = 'Update')
-
-sp_data_latest = sp_list.GetListItems(fields=['ID', 'Title', 'AKS1!'])
-print(sp_data_latest)
+print(yesterday_update)
