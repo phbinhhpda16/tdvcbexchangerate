@@ -8,6 +8,7 @@ from shareplum import Office365
 
 tv = TvDatafeed('thuongdoan.bg@gmail.com', 'Kinkin@123')
 today = dt.datetime.today().strftime('%d/%m/%Y')
+yesterday = (dt.datetime.today() + dt.timedelta(days=-1)).strftime('%d/%m/%Y')
 
 def data_extract(symbol, exchange):
     data = tv.get_hist(symbol=symbol,exchange=exchange,interval=Interval.in_daily,n_bars=1)
@@ -54,25 +55,22 @@ all_data = vcb_rate.merge(aks, on = "Update Day", how = "outer")
 all_data = all_data.merge(usdjpn, on = "Update Day", how = "outer")
 all_data = all_data.to_dict("records")
 
+#Add new data
 authcookie = Office365('https://datapot01.sharepoint.com', username = 'exratekinkin@datapot01.onmicrosoft.com', password = '@Datapot2018').GetCookies()
 site = Site('https://datapot01.sharepoint.com/sites/ExchangeRate', authcookie=authcookie)
 sp_list = site.List("exrate")
 sp_list.UpdateListItems(data = all_data, kind = 'New')
+print(sp_list)
 
-print(all_data)
+#Update yesterday data
+sp_data = sp_list.GetListItems(fields=['ID', 'Title'])[-2]
+sp_data_df = pd.DataFrame(sp_data, index=[0])
+sp_data_df.rename(columns = {"Title": "Update Day"}, inplace = True)
+aks_yesterday = aks
+aks_yesterday.at[0, "Update Day"] = yesterday
+sp_data_df = sp_data_df.merge(aks_yesterday, on = "Update Day", how = "outer")
+yesterday_update = sp_data_df.to_dict("records")
+sp_list.UpdateListItems(data = yesterday_update, kind = 'Update')
 
-#vcb = pd.read_csv("E:\\Code\\VCB\\VCB.csv")
-
-#all_data = vcb.merge(aks, on = "Update Day", how = "outer")
-#all_data = all_data.merge(usdjpn, on = "Update Day", how = "outer")
-#all_data = all_data.fillna(method='ffill')
-
-#print(all_data.head(20))
-
-#result_path = "E:\\Code\\VCB\\VCB.xlsx"  
-#sheet_result = 'Sheet2' 
-#writer = pd.ExcelWriter(result_path, engine = 'xlsxwriter')
-#all_data.to_excel(writer, sheet_name=sheet_result, index=False)
-#writer.save()
-
-#,'https://datapot01.sharepoint.com','exratekinkin@datapot01.onmicrosoft.com','@Datapot2018','https://datapot01.sharepoint.com/sites/ExchangeRate',"exchange_rate"
+sp_data_latest = sp_list.GetListItems(fields=['ID', 'Title', 'AKS1!'])
+print(sp_data_latest)
