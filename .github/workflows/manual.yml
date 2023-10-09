@@ -24,6 +24,6 @@ jobs:
           pip install requests
           pip install bs4
           pip install urllib3
-          pip install ssl
+          pip install --upgrade ssl
       - name: execute py script # run main.py
         run: python main.py
