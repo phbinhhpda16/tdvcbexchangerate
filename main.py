@@ -1,12 +1,14 @@
 from tvDatafeed import TvDatafeed, Interval
 import pandas as pd
 import datetime as dt
-import requests
 from bs4 import BeautifulSoup
 from shareplum import Site
 from shareplum import Office365
+import requests
+import urllib3
+import ssl
 
-tv = TvDatafeed('thuongdoan.bg@gmail.com', 'Kinkin@123')
+tv = TvDatafeed('', '')
 today = dt.datetime.today().strftime('%d/%m/%Y')
 yesterday = (dt.datetime.today() + dt.timedelta(days=-1)).strftime('%d/%m/%Y')
 
@@ -20,12 +22,30 @@ def data_extract(symbol, exchange):
         data.at[0, "Update Day"] = today
     return data
 
+class CustomHttpAdapter (requests.adapters.HTTPAdapter):
+    # "Transport adapter" that allows us to use custom ssl_context.
+    def __init__(self, ssl_context=None, **kwargs):
+        self.ssl_context = ssl_context
+        super().__init__(**kwargs)
+
+    def init_poolmanager(self, connections, maxsize, block=False):
+        self.poolmanager = urllib3.poolmanager.PoolManager(
+            num_pools=connections, maxsize=maxsize,
+            block=block, ssl_context=self.ssl_context)
+
+def get_legacy_session():
+    ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+    ctx.options |= 0x4  # OP_LEGACY_SERVER_CONNECT
+    session = requests.session()
+    session.mount('https://', CustomHttpAdapter(ctx))
+    return session
+
 def vcb(date):
     data_list = []
     date_string = date.strftime("%d/%m/%Y")
     url = "https://portal.vietcombank.com.vn/UserControls/TVPortal.TyGia/pListTyGia.aspx?txttungay={}&BacrhID=1&isEn=False".format(date_string)
-    response = requests.get(url)
-    html_content = response.content
+    request = get_legacy_session().get(url)
+    html_content = request.content
     soup = BeautifulSoup(html_content, "html.parser")
     try:
         table = soup.find("table", class_="tbl-01 rateTable")
@@ -45,8 +65,7 @@ def vcb(date):
         print(date_string)
     data = pd.DataFrame(data_list, columns=["Update Day", "JPN", "USD"])
     return data
-
-
+    
 aks = data_extract('AKS1!', 'NYMEX')
 usdjpn = data_extract('USDJPY', 'OANDA')
 vcb_rate = vcb(dt.datetime.today())
@@ -60,7 +79,7 @@ authcookie = Office365('https://datapot01.sharepoint.com', username = 'exratekin
 site = Site('https://datapot01.sharepoint.com/sites/ExchangeRate', authcookie=authcookie)
 sp_list = site.List("exrate")
 sp_list.UpdateListItems(data = all_data, kind = 'New')
-print(sp_list)
+print(all_data)
 
 #Update yesterday data
 sp_data = sp_list.GetListItems(fields=['ID', 'Title'])[-2]
@@ -71,4 +90,5 @@ aks_yesterday.at[0, "Update Day"] = yesterday
 sp_data_df = sp_data_df.merge(aks_yesterday, on = "Update Day", how = "outer")
 yesterday_update = sp_data_df.to_dict("records")
 sp_list.UpdateListItems(data = yesterday_update, kind = 'Update')
+
 print(yesterday_update)
