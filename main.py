@@ -25,14 +25,15 @@ def vcb(date):
     date_string = date.strftime("%d/%m/%Y")
     update_day = date_string
     url = "https://portal.vietcombank.com.vn/Usercontrols/TVPortal.TyGia/pXML.aspx"
-    response = requests.get(url)
+    proxies = {"http": "http://10.10.1.10:3128","https": "https://10.10.1.10:1080",}
+    response = requests.get(url, proxies=proxies)
     html_content = response.content
     soup = BeautifulSoup(html_content, "xml")
     jpn = soup.find('Exrate', {'CurrencyCode': 'JPY'}).get('Sell')
     usd = soup.find('Exrate', {'CurrencyCode': 'USD'}).get('Sell')
     data_list.append([update_day, jpn, usd])
     data = pd.DataFrame(data_list, columns=["Update Day", "JPN", "USD"])
-    return data097
+    return data
 
 aks = data_extract('AKS1!', 'NYMEX')
 usdjpn = data_extract('USDJPY', 'OANDA')
