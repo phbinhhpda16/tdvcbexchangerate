@@ -8,7 +8,6 @@ import requests
 import urllib3
 import ssl
 
-
 class CustomHttpAdapter (requests.adapters.HTTPAdapter):
     # "Transport adapter" that allows us to use custom ssl_context.
     def __init__(self, ssl_context=None, **kwargs):
@@ -68,8 +67,6 @@ def vcb(date):
     data = pd.DataFrame(data_list, columns=["Update Day", "JPN", "USD"])
     return data
 
-
-
 aks = data_extract('AKS1!', 'NYMEX')
 usdjpn = data_extract('USDJPY', 'OANDA')
 vcb_rate = vcb(dt.datetime.today())
@@ -82,8 +79,8 @@ all_data = all_data.to_dict("records")
 authcookie = Office365('https://datapot01.sharepoint.com', username = 'exratekinkin@datapot01.onmicrosoft.com', password = '@Datapot2018').GetCookies()
 site = Site('https://datapot01.sharepoint.com/sites/ExchangeRate', authcookie=authcookie)
 sp_list = site.List("exrate")
-#sp_list.UpdateListItems(data = all_data, kind = 'New')
-print(sp_list)
+sp_list.UpdateListItems(data = all_data, kind = 'New')
+print(all_data)
 
 #Update yesterday data
 sp_data = sp_list.GetListItems(fields=['ID', 'Title'])[-2]
@@ -93,6 +90,5 @@ aks_yesterday = aks
 aks_yesterday.at[0, "Update Day"] = yesterday
 sp_data_df = sp_data_df.merge(aks_yesterday, on = "Update Day", how = "outer")
 yesterday_update = sp_data_df.to_dict("records")
-#sp_list.UpdateListItems(data = yesterday_update, kind = 'Update')
-
+sp_list.UpdateListItems(data = yesterday_update, kind = 'Update')
 print(yesterday_update)
