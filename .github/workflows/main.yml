@@ -24,5 +24,6 @@ jobs:
           pip install datetime
           pip install requests
           pip install bs4
+          pip install urllib3
       - name: execute py script # run main.py
         run: python main.py
